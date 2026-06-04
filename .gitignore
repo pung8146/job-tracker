@@ -4,6 +4,8 @@ out
 dist
 coverage
 data/collected
+data/*.db
+data/*.db-*
 *.tsbuildinfo
 .env*
 !.env.example
