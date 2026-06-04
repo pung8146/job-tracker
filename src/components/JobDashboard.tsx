@@ -1,0 +1,60 @@
+"use client";
+
+import { useMemo, useState } from "react";
+
+import { DashboardSummary } from "@/components/DashboardSummary";
+import { JobCard } from "@/components/JobCard";
+import { JobFilter } from "@/components/JobFilter";
+import { mockJobs } from "@/data/mockJobs";
+import { filterJobs, getDashboardSummary, getKeywordOptions, MOCK_TODAY } from "@/lib/jobs";
+import type { JobFilterState } from "@/types/job";
+
+const initialFilters: JobFilterState = {
+  keyword: "All",
+  aiOnly: false,
+  newOnly: false
+};
+
+export function JobDashboard() {
+  const [filters, setFilters] = useState<JobFilterState>(initialFilters);
+
+  const summary = useMemo(() => getDashboardSummary(mockJobs, MOCK_TODAY), []);
+  const keywordOptions = useMemo(() => getKeywordOptions(mockJobs), []);
+  const filteredJobs = useMemo(() => filterJobs(mockJobs, filters), [filters]);
+
+  return (
+    <main className="min-h-screen bg-slate-50">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+        <header className="mb-6 flex flex-col gap-2">
+          <p className="text-sm font-semibold text-sky-700">Job Tracker</p>
+          <h1 className="text-2xl font-semibold tracking-normal text-slate-950 sm:text-3xl">
+            개발자 채용공고 대시보드
+          </h1>
+          <p className="max-w-3xl text-sm leading-6 text-slate-600">
+            mock 데이터로 신규 공고, AI 관련 공고, 기술스택, 마감 임박 공고를 한 화면에서
+            확인합니다.
+          </p>
+        </header>
+
+        <DashboardSummary stats={summary} />
+      </div>
+
+      <JobFilter
+        filters={filters}
+        keywordOptions={keywordOptions}
+        onChange={setFilters}
+        resultCount={filteredJobs.length}
+      />
+
+      <section className="mx-auto grid max-w-6xl gap-4 px-4 py-6 sm:px-6 lg:px-8" aria-label="공고 목록">
+        {filteredJobs.length > 0 ? (
+          filteredJobs.map((job) => <JobCard job={job} key={job.id} />)
+        ) : (
+          <div className="rounded border border-dashed border-slate-300 bg-white px-4 py-10 text-center text-sm text-slate-600">
+            조건에 맞는 공고가 없습니다.
+          </div>
+        )}
+      </section>
+    </main>
+  );
+}
