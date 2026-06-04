@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 
 import { dedupeJobs, summarizeCollection } from "../src/lib/collection";
 import { requireEnvValue } from "../src/lib/env";
+import { saveCollectionRun, upsertJobs } from "../src/lib/jobRepository";
 import { searchSaraminJobs } from "../src/lib/saraminClient";
 import { normalizeSaraminJobs } from "../src/lib/saraminNormalizer";
 
@@ -31,11 +32,19 @@ async function main() {
   writeFileSync(outputPath, `${JSON.stringify(jobs, null, 2)}\n`, "utf8");
   writeFileSync(latestPath, `${JSON.stringify(jobs, null, 2)}\n`, "utf8");
   writeFileSync(summaryPath, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
+  upsertJobs(jobs);
+  saveCollectionRun({
+    source: "Saramin",
+    keyword,
+    summary,
+    status: "success"
+  });
 
   console.log(`Saramin jobs saved: ${jobs.length}`);
   console.log(`Output: ${outputPath}`);
   console.log(`Latest: ${latestPath}`);
   console.log(`Summary: ${summaryPath}`);
+  console.log("SQLite database updated");
   console.log(
     `Summary total=${summary.total}, new=${summary.newJobs}, ai=${summary.aiRelated}, closingSoon=${summary.closingSoon}`
   );
