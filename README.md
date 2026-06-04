@@ -26,7 +26,15 @@ npm run dev
 
 ## 향후 계획
 
+- 데이터 모델 정리와 중복 공고 판단
+- 사람인 채용공고 API 연동
 - 사람인 등 채용 플랫폼 수집 연동
 - Supabase 저장소 연동
 - 관심 공고 저장과 지원 상태 관리
 - 일일 요약, 마감 임박 알림, 자동 리포트
+
+## 문서
+
+- [PRD](docs/PRD.md)
+- [데이터 모델](docs/DATA_MODEL.md)
+- [데이터 수집 설계](docs/COLLECTION_PLAN.md)
