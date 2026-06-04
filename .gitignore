@@ -3,6 +3,7 @@ node_modules
 out
 dist
 coverage
+data/collected
 *.tsbuildinfo
 .env*
 !.env.example

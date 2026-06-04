@@ -7,6 +7,8 @@ export type JobPosting = {
   title: string;
   company: string;
   source: JobSource;
+  sourceJobId?: string;
+  url?: string;
   location: string;
   experience: string;
   employmentType: EmploymentType;
@@ -16,6 +18,9 @@ export type JobPosting = {
   isAiRelated: boolean;
   isNew: boolean;
   collectedAt: string;
+  firstSeenAt?: string;
+  lastSeenAt?: string;
+  status?: "open" | "closed" | "expired" | "unknown";
 };
 
 export type JobFilterState = {
