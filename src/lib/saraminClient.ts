@@ -9,6 +9,18 @@ export type SearchSaraminJobsParams = {
   start?: number;
 };
 
+function buildSaraminSearchUrl({ accessKey, keywords, count = 10, start = 0 }: SearchSaraminJobsParams): string {
+  const searchParams = new URLSearchParams({
+    "access-key": accessKey,
+    keywords,
+    count: String(count),
+    start: String(start),
+    fields: "posting-date,expiration-date,keyword-code,count"
+  });
+
+  return `${SARIMIN_JOB_SEARCH_URL}?${searchParams.toString()}`;
+}
+
 function normalizeJobList(response: SaraminJobSearchResponse): SaraminJob[] {
   const job = response["job-search"]?.jobs?.job;
 
@@ -19,30 +31,21 @@ function normalizeJobList(response: SaraminJobSearchResponse): SaraminJob[] {
   return Array.isArray(job) ? job : [job];
 }
 
-export async function searchSaraminJobs({
-  accessKey,
-  keywords,
-  count = 10,
-  start = 0
-}: SearchSaraminJobsParams): Promise<SaraminJob[]> {
-  const searchParams = new URLSearchParams({
-    "access-key": accessKey,
-    keywords,
-    count: String(count),
-    start: String(start),
-    fields: "posting-date,expiration-date,keyword-code,count"
-  });
+export async function searchSaraminJobs(params: SearchSaraminJobsParams): Promise<SaraminJob[]> {
+  const data = (await searchSaraminJobsRaw(params)) as SaraminJobSearchResponse;
+  return normalizeJobList(data);
+}
 
-  const response = await fetch(`${SARIMIN_JOB_SEARCH_URL}?${searchParams.toString()}`, {
+export async function searchSaraminJobsRaw(params: SearchSaraminJobsParams): Promise<unknown> {
+  const response = await fetch(buildSaraminSearchUrl(params), {
     headers: {
       Accept: "application/json"
     }
   });
 
   if (!response.ok) {
-    throw new Error(`사람인 API 요청 실패: HTTP ${response.status}`);
+    throw new Error(`Saramin API request failed: HTTP ${response.status}`);
   }
 
-  const data = (await response.json()) as SaraminJobSearchResponse;
-  return normalizeJobList(data);
+  return response.json();
 }

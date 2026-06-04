@@ -4,6 +4,7 @@ out
 dist
 coverage
 data/collected
+data/raw
 data/*.db
 data/*.db-*
 *.tsbuildinfo

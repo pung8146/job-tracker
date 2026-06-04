@@ -2,7 +2,7 @@
 
 ## 목표
 
-매일 개발자 채용공고를 수집해 신규 공고, AI 관련 공고, 기술스택, 마감 임박 공고를 대시보드에서 볼 수 있게 한다. 이번 문서는 설계만 다루며 실제 API, 크롤링, Supabase 구현은 하지 않는다.
+매일 개발자 채용공고를 수집해 신규 공고, AI 관련 공고, 기술스택, 마감 임박 공고를 대시보드에서 볼 수 있게 한다. 실제 API 응답 구조는 raw 저장 후 검증한다.
 
 ## 출처 우선순위
 
@@ -31,15 +31,17 @@
 
 ## 수집 흐름
 
-1. 매일 오전 정해진 시간에 수집 작업 시작
+1. 매일 정해진 시간에 수집 작업 시작
 2. 출처별 수집기 실행
-3. 원본 응답을 표준 `JobPosting` 형태로 변환
-4. 중복 공고 병합
-5. 신규 공고 여부 계산
-6. AI 관련 여부와 기술스택 태그 계산
-7. 마감일 기준 상태 갱신
-8. 대시보드 데이터 저장
-9. 수집 결과 요약 기록
+3. 원본 응답을 `data/raw`에 저장
+4. raw 샘플을 기준으로 normalizer 검증
+5. 원본 응답을 표준 `JobPosting` 형태로 변환
+6. 중복 공고 병합
+7. 신규 공고 여부 계산
+8. AI 관련 여부와 기술스택 태그 계산
+9. 마감일 기준 상태 갱신
+10. JSON 또는 SQLite에 저장
+11. 수집 결과 요약 기록
 
 ## 수집기 구조
 
@@ -64,12 +66,23 @@ classifier/
 ```bash
 SARIMIN_ACCESS_KEY=
 JOBKOREA_API_KEY=
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-`SUPABASE_SERVICE_ROLE_KEY`는 서버 작업에서만 사용한다. 브라우저에 노출하지 않는다.
+## 원본 응답 저장
+
+실제 API 응답 구조가 문서와 다를 수 있으므로 DB 저장 전에 원본 응답을 먼저 저장한다.
+
+```bash
+npm run collect:saramin:raw -- AI
+```
+
+저장 위치:
+
+```text
+data/raw/saramin-YYYY-MM-DD-AI.json
+```
+
+`data/raw`는 로컬 검증용이므로 git에 올리지 않는다.
 
 ## 실패 처리
 
@@ -81,15 +94,9 @@ SUPABASE_SERVICE_ROLE_KEY=
 ## 단계별 구현 계획
 
 1. 데이터 모델 문서와 mock 데이터 필드 맞추기
-2. 사람인 API 키 발급과 호출 샘플 확인
-3. 사람인 응답을 `JobPosting`으로 변환하는 normalizer 작성
+2. 사람인 API 키 발급과 raw 응답 저장
+3. 실제 raw 응답 기반 normalizer 테스트 보강
 4. 중복 판단 함수와 신규 공고 계산 함수 작성
-5. Supabase 테이블 설계
+5. SQLite 저장 함수 작성
 6. 일일 수집 작업 추가
 7. 원티드/잡코리아는 정책과 공식 API 확인 후 추가
-
-## 참고
-
-- 사람인 공식 API는 이용신청과 access-key 발급이 필요하다.
-- 사람인 채용공고 API는 JSON 또는 XML 응답을 받을 수 있다.
-- 자동 크롤링은 각 서비스 약관, robots 정책, 로그인 필요 여부를 확인한 뒤 결정한다.

@@ -41,14 +41,21 @@ SQLite DB는 `data/job-tracker.db`에 생성되며 git에는 올리지 않습니
 SARIMIN_ACCESS_KEY=발급받은_키
 ```
 
-수집 테스트:
+정규화된 수집 데이터 저장:
 
 ```bash
 npm run collect:saramin -- AI
 ```
 
+원본 응답 저장:
+
+```bash
+npm run collect:saramin:raw -- AI
+```
+
 ## 향후 계획
 
+- 실제 사람인 raw 응답 기반 normalizer 보정
 - 사람인 수집 결과를 SQLite에 저장
 - 대시보드가 SQLite에서 공고 읽기
 - 관심 공고 저장과 지원 상태 관리
