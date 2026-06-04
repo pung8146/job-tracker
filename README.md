@@ -29,6 +29,7 @@ npm run dev
 
 ```bash
 npm run db:init
+npm run db:seed
 ```
 
 SQLite DB는 `data/job-tracker.db`에 생성되며 git에는 올리지 않습니다.

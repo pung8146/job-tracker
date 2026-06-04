@@ -8,6 +8,7 @@ Job Tracker는 우선 로컬 SQLite DB에 공고와 수집 이력을 저장한�
 
 ```bash
 npm run db:init
+npm run db:seed
 ```
 
 생성 파일:
@@ -17,6 +18,8 @@ data/job-tracker.db
 ```
 
 DB 파일은 개인 로컬 데이터라 git에 올리지 않는다.
+
+`npm run db:seed`는 mock 공고를 SQLite에 넣어 API 승인 전에도 DB 기반 대시보드 흐름을 확인할 수 있게 한다.
 
 ## 테이블
 

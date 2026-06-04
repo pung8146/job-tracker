@@ -4,6 +4,8 @@ import { loadCollectedJobsFromFile } from "@/lib/collectedJobs";
 import { getJobsFromDatabase } from "@/lib/jobRepository";
 import type { JobPosting } from "@/types/job";
 
+export const dynamic = "force-dynamic";
+
 function getDashboardJobs(): { jobs: JobPosting[]; dataSourceLabel: string } {
   const databaseJobs = getJobsFromDatabase();
 

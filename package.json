@@ -9,6 +9,7 @@
     "collect:saramin": "tsx scripts/collectSaramin.ts",
     "collect:saramin:raw": "tsx scripts/collectSaraminRaw.ts",
     "db:init": "tsx scripts/initDb.ts",
+    "db:seed": "tsx scripts/seedMockJobs.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
