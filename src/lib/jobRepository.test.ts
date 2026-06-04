@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import type { CollectionSummary } from "./collection";
 import { initializeDatabase } from "./db";
-import { saveCollectionRun, upsertJobs } from "./jobRepository";
+import { getJobsFromDatabase, saveCollectionRun, upsertJobs } from "./jobRepository";
 import type { JobPosting } from "../types/job";
 
 let tempDirectory: string | undefined;
@@ -131,5 +131,19 @@ describe("jobRepository", () => {
     expect(saved.ai_related).toBe(1);
     expect(saved.closing_soon).toBe(1);
     expect(saved.status).toBe("success");
+  });
+
+  it("reads saved jobs as JobPosting objects", () => {
+    const dbPath = createTempDbPath();
+    initializeDatabase(dbPath);
+    upsertJobs([job], dbPath);
+
+    expect(getJobsFromDatabase(dbPath)).toEqual([job]);
+  });
+
+  it("returns an empty list when the database file does not exist", () => {
+    const dbPath = createTempDbPath();
+
+    expect(getJobsFromDatabase(dbPath)).toEqual([]);
   });
 });

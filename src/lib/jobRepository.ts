@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+
 import Database from "better-sqlite3";
 
 import type { CollectionSummary } from "./collection";
@@ -12,8 +14,95 @@ export type SaveCollectionRunInput = {
   errorMessage?: string;
 };
 
+type JobRow = {
+  id: string;
+  source: JobPosting["source"];
+  source_job_id: string | null;
+  url: string | null;
+  title: string;
+  company: string;
+  location: string;
+  experience: string;
+  employment_type: JobPosting["employmentType"];
+  deadline: string;
+  keywords_json: string;
+  tech_stacks_json: string;
+  is_ai_related: number;
+  is_new: number;
+  collected_at: string;
+  first_seen_at: string | null;
+  last_seen_at: string | null;
+  status: NonNullable<JobPosting["status"]>;
+};
+
 function booleanToInteger(value: boolean): number {
   return value ? 1 : 0;
+}
+
+function parseJsonStringArray(value: string): string[] {
+  const parsed = JSON.parse(value) as unknown;
+  return Array.isArray(parsed) && parsed.every((item) => typeof item === "string") ? parsed : [];
+}
+
+function rowToJobPosting(row: JobRow): JobPosting {
+  return {
+    id: row.id,
+    source: row.source,
+    sourceJobId: row.source_job_id ?? undefined,
+    url: row.url ?? undefined,
+    title: row.title,
+    company: row.company,
+    location: row.location,
+    experience: row.experience,
+    employmentType: row.employment_type,
+    deadline: row.deadline,
+    keywords: parseJsonStringArray(row.keywords_json),
+    techStacks: parseJsonStringArray(row.tech_stacks_json),
+    isAiRelated: row.is_ai_related === 1,
+    isNew: row.is_new === 1,
+    collectedAt: row.collected_at,
+    firstSeenAt: row.first_seen_at ?? undefined,
+    lastSeenAt: row.last_seen_at ?? undefined,
+    status: row.status
+  };
+}
+
+export function getJobsFromDatabase(dbPath = DEFAULT_DATABASE_PATH): JobPosting[] {
+  if (!existsSync(dbPath)) {
+    return [];
+  }
+
+  const db = new Database(dbPath, { readonly: true });
+  const rows = db
+    .prepare(
+      `
+        SELECT
+          id,
+          source,
+          source_job_id,
+          url,
+          title,
+          company,
+          location,
+          experience,
+          employment_type,
+          deadline,
+          keywords_json,
+          tech_stacks_json,
+          is_ai_related,
+          is_new,
+          collected_at,
+          first_seen_at,
+          last_seen_at,
+          status
+        FROM jobs
+        ORDER BY collected_at DESC, deadline ASC, id ASC
+      `
+    )
+    .all() as JobRow[];
+  db.close();
+
+  return rows.map(rowToJobPosting);
 }
 
 export function upsertJobs(jobs: JobPosting[], dbPath = DEFAULT_DATABASE_PATH): void {
