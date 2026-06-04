@@ -5,9 +5,8 @@ import { useMemo, useState } from "react";
 import { DashboardSummary } from "@/components/DashboardSummary";
 import { JobCard } from "@/components/JobCard";
 import { JobFilter } from "@/components/JobFilter";
-import { mockJobs } from "@/data/mockJobs";
 import { filterJobs, getDashboardSummary, getKeywordOptions, MOCK_TODAY } from "@/lib/jobs";
-import type { JobFilterState } from "@/types/job";
+import type { JobFilterState, JobPosting } from "@/types/job";
 
 const initialFilters: JobFilterState = {
   keyword: "All",
@@ -15,12 +14,17 @@ const initialFilters: JobFilterState = {
   newOnly: false
 };
 
-export function JobDashboard() {
+type JobDashboardProps = {
+  jobs: JobPosting[];
+  dataSourceLabel: string;
+};
+
+export function JobDashboard({ jobs, dataSourceLabel }: JobDashboardProps) {
   const [filters, setFilters] = useState<JobFilterState>(initialFilters);
 
-  const summary = useMemo(() => getDashboardSummary(mockJobs, MOCK_TODAY), []);
-  const keywordOptions = useMemo(() => getKeywordOptions(mockJobs), []);
-  const filteredJobs = useMemo(() => filterJobs(mockJobs, filters), [filters]);
+  const summary = useMemo(() => getDashboardSummary(jobs, MOCK_TODAY), [jobs]);
+  const keywordOptions = useMemo(() => getKeywordOptions(jobs), [jobs]);
+  const filteredJobs = useMemo(() => filterJobs(jobs, filters), [jobs, filters]);
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -31,7 +35,7 @@ export function JobDashboard() {
             개발자 채용공고 대시보드
           </h1>
           <p className="max-w-3xl text-sm leading-6 text-slate-600">
-            mock 데이터로 신규 공고, AI 관련 공고, 기술스택, 마감 임박 공고를 한 화면에서
+            {dataSourceLabel}로 신규 공고, AI 관련 공고, 기술스택, 마감 임박 공고를 한 화면에서
             확인합니다.
           </p>
         </header>
