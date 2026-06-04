@@ -1,13 +1,15 @@
 import { Bookmark, CalendarDays, MapPin } from "lucide-react";
 
-import type { JobPosting } from "@/types/job";
+import { toggleFavoriteJobAction } from "@/app/actions";
 import { TechStackBadge } from "@/components/TechStackBadge";
+import type { JobPosting } from "@/types/job";
 
 type JobCardProps = {
   job: JobPosting;
+  isFavorite: boolean;
 };
 
-export function JobCard({ job }: JobCardProps) {
+export function JobCard({ job, isFavorite }: JobCardProps) {
   return (
     <article className="rounded border border-slate-200 bg-white p-4 shadow-sm">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -26,19 +28,31 @@ export function JobCard({ job }: JobCardProps) {
                 AI 관련
               </span>
             ) : null}
+            {isFavorite ? (
+              <span className="rounded bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700">
+                관심
+              </span>
+            ) : null}
           </div>
 
           <h2 className="mt-3 text-lg font-semibold leading-snug text-slate-950">{job.title}</h2>
           <p className="mt-1 text-sm font-medium text-slate-600">{job.company}</p>
         </div>
 
-        <button
-          className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-          type="button"
-        >
-          <Bookmark aria-hidden="true" size={17} />
-          관심 등록
-        </button>
+        <form action={toggleFavoriteJobAction}>
+          <input name="jobId" type="hidden" value={job.id} />
+          <button
+            className={`inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded border px-3 text-sm font-semibold ${
+              isFavorite
+                ? "border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100"
+                : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+            }`}
+            type="submit"
+          >
+            <Bookmark aria-hidden="true" fill={isFavorite ? "currentColor" : "none"} size={17} />
+            {isFavorite ? "관심 해제" : "관심 등록"}
+          </button>
+        </form>
       </div>
 
       <dl className="mt-4 grid gap-3 text-sm text-slate-700 sm:grid-cols-2 lg:grid-cols-4">

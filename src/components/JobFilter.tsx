@@ -11,6 +11,13 @@ type JobFilterProps = {
   onChange: (filters: JobFilterState) => void;
 };
 
+const resetFilters: JobFilterState = {
+  keyword: "All",
+  aiOnly: false,
+  newOnly: false,
+  favoriteOnly: false
+};
+
 export function JobFilter({ filters, keywordOptions, resultCount, onChange }: JobFilterProps) {
   const updateFilter = <Key extends keyof JobFilterState>(
     key: Key,
@@ -35,7 +42,7 @@ export function JobFilter({ filters, keywordOptions, resultCount, onChange }: Jo
           </div>
           <button
             className="inline-flex h-9 items-center gap-2 rounded border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            onClick={() => onChange({ keyword: "All", aiOnly: false, newOnly: false })}
+            onClick={() => onChange(resetFilters)}
             type="button"
           >
             <RotateCcw aria-hidden="true" size={16} />
@@ -77,6 +84,15 @@ export function JobFilter({ filters, keywordOptions, resultCount, onChange }: Jo
                 type="checkbox"
               />
               신규 공고만 보기
+            </label>
+            <label className="flex h-10 items-center gap-2 text-sm font-medium text-slate-700">
+              <input
+                checked={filters.favoriteOnly}
+                className="size-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                onChange={(event) => updateFilter("favoriteOnly", event.target.checked)}
+                type="checkbox"
+              />
+              관심 공고만 보기
             </label>
           </div>
         </div>

@@ -11,20 +11,26 @@ import type { JobFilterState, JobPosting } from "@/types/job";
 const initialFilters: JobFilterState = {
   keyword: "All",
   aiOnly: false,
-  newOnly: false
+  newOnly: false,
+  favoriteOnly: false
 };
 
 type JobDashboardProps = {
   jobs: JobPosting[];
   dataSourceLabel: string;
+  favoriteJobIds: string[];
 };
 
-export function JobDashboard({ jobs, dataSourceLabel }: JobDashboardProps) {
+export function JobDashboard({ jobs, dataSourceLabel, favoriteJobIds }: JobDashboardProps) {
   const [filters, setFilters] = useState<JobFilterState>(initialFilters);
+  const favoriteJobIdSet = useMemo(() => new Set(favoriteJobIds), [favoriteJobIds]);
 
   const summary = useMemo(() => getDashboardSummary(jobs, MOCK_TODAY), [jobs]);
   const keywordOptions = useMemo(() => getKeywordOptions(jobs), [jobs]);
-  const filteredJobs = useMemo(() => filterJobs(jobs, filters), [jobs, filters]);
+  const filteredJobs = useMemo(() => {
+    const baseJobs = filterJobs(jobs, filters);
+    return filters.favoriteOnly ? baseJobs.filter((job) => favoriteJobIdSet.has(job.id)) : baseJobs;
+  }, [favoriteJobIdSet, filters, jobs]);
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -52,7 +58,9 @@ export function JobDashboard({ jobs, dataSourceLabel }: JobDashboardProps) {
 
       <section className="mx-auto grid max-w-6xl gap-4 px-4 py-6 sm:px-6 lg:px-8" aria-label="공고 목록">
         {filteredJobs.length > 0 ? (
-          filteredJobs.map((job) => <JobCard job={job} key={job.id} />)
+          filteredJobs.map((job) => (
+            <JobCard isFavorite={favoriteJobIdSet.has(job.id)} job={job} key={job.id} />
+          ))
         ) : (
           <div className="rounded border border-dashed border-slate-300 bg-white px-4 py-10 text-center text-sm text-slate-600">
             조건에 맞는 공고가 없습니다.

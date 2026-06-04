@@ -27,6 +27,7 @@ export type JobFilterState = {
   keyword: string;
   aiOnly: boolean;
   newOnly: boolean;
+  favoriteOnly: boolean;
 };
 
 export type DashboardSummaryStats = {

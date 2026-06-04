@@ -1,7 +1,7 @@
 import { JobDashboard } from "@/components/JobDashboard";
 import { mockJobs } from "@/data/mockJobs";
 import { loadCollectedJobsFromFile } from "@/lib/collectedJobs";
-import { getJobsFromDatabase } from "@/lib/jobRepository";
+import { getFavoriteJobIds, getJobsFromDatabase } from "@/lib/jobRepository";
 import type { JobPosting } from "@/types/job";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +33,7 @@ function getDashboardJobs(): { jobs: JobPosting[]; dataSourceLabel: string } {
 
 export default function Home() {
   const { jobs, dataSourceLabel } = getDashboardJobs();
+  const favoriteJobIds = getFavoriteJobIds();
 
-  return <JobDashboard dataSourceLabel={dataSourceLabel} jobs={jobs} />;
+  return <JobDashboard dataSourceLabel={dataSourceLabel} favoriteJobIds={favoriteJobIds} jobs={jobs} />;
 }

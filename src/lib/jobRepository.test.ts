@@ -7,7 +7,13 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import type { CollectionSummary } from "./collection";
 import { initializeDatabase } from "./db";
-import { getJobsFromDatabase, saveCollectionRun, upsertJobs } from "./jobRepository";
+import {
+  getFavoriteJobIds,
+  getJobsFromDatabase,
+  saveCollectionRun,
+  toggleFavoriteJob,
+  upsertJobs
+} from "./jobRepository";
 import type { JobPosting } from "../types/job";
 
 let tempDirectory: string | undefined;
@@ -145,5 +151,23 @@ describe("jobRepository", () => {
     const dbPath = createTempDbPath();
 
     expect(getJobsFromDatabase(dbPath)).toEqual([]);
+  });
+
+  it("toggles favorite jobs in SQLite", () => {
+    const dbPath = createTempDbPath();
+    initializeDatabase(dbPath);
+    upsertJobs([job], dbPath);
+
+    expect(toggleFavoriteJob(job.id, dbPath)).toEqual({
+      jobId: job.id,
+      isFavorite: true
+    });
+    expect(getFavoriteJobIds(dbPath)).toEqual([job.id]);
+
+    expect(toggleFavoriteJob(job.id, dbPath)).toEqual({
+      jobId: job.id,
+      isFavorite: false
+    });
+    expect(getFavoriteJobIds(dbPath)).toEqual([]);
   });
 });

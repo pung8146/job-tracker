@@ -14,6 +14,11 @@ export type SaveCollectionRunInput = {
   errorMessage?: string;
 };
 
+export type ToggleFavoriteResult = {
+  jobId: string;
+  isFavorite: boolean;
+};
+
 type JobRow = {
   id: string;
   source: JobPosting["source"];
@@ -238,4 +243,45 @@ export function saveCollectionRun(input: SaveCollectionRunInput, dbPath = DEFAUL
     errorMessage: input.errorMessage ?? null
   });
   db.close();
+}
+
+export function getFavoriteJobIds(dbPath = DEFAULT_DATABASE_PATH): string[] {
+  if (!existsSync(dbPath)) {
+    return [];
+  }
+
+  const db = new Database(dbPath, { readonly: true });
+  const rows = db
+    .prepare("SELECT job_id FROM favorite_jobs ORDER BY created_at DESC, job_id ASC")
+    .all() as Array<{ job_id: string }>;
+  db.close();
+
+  return rows.map((row) => row.job_id);
+}
+
+export function toggleFavoriteJob(jobId: string, dbPath = DEFAULT_DATABASE_PATH): ToggleFavoriteResult {
+  initializeDatabase(dbPath);
+
+  const db = new Database(dbPath);
+  const existing = db
+    .prepare("SELECT job_id FROM favorite_jobs WHERE job_id = ?")
+    .get(jobId) as { job_id: string } | undefined;
+
+  if (existing) {
+    db.prepare("DELETE FROM favorite_jobs WHERE job_id = ?").run(jobId);
+    db.close();
+
+    return {
+      jobId,
+      isFavorite: false
+    };
+  }
+
+  db.prepare("INSERT INTO favorite_jobs (job_id) VALUES (?)").run(jobId);
+  db.close();
+
+  return {
+    jobId,
+    isFavorite: true
+  };
 }

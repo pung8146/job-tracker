@@ -51,7 +51,8 @@ describe("job dashboard helpers", () => {
       filterJobs(jobs, {
         keyword: "AI",
         aiOnly: true,
-        newOnly: true
+        newOnly: true,
+        favoriteOnly: false
       }).map((job) => job.id)
     ).toEqual(["job-1"]);
   });
