@@ -1,9 +1,10 @@
-import { writeFileSync, mkdirSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { dedupeJobs, summarizeCollection } from "../src/lib/collection";
 import { requireEnvValue } from "../src/lib/env";
-import { normalizeSaraminJobs } from "../src/lib/saraminNormalizer";
 import { searchSaraminJobs } from "../src/lib/saraminClient";
+import { normalizeSaraminJobs } from "../src/lib/saraminNormalizer";
 
 function todayDateOnly(): string {
   return new Date().toISOString().slice(0, 10);
@@ -11,7 +12,7 @@ function todayDateOnly(): string {
 
 async function main() {
   const accessKey = requireEnvValue("SARIMIN_ACCESS_KEY");
-  const keyword = process.argv[2] ?? "프론트엔드";
+  const keyword = process.argv[2] ?? "frontend";
   const collectedAt = todayDateOnly();
 
   const saraminJobs = await searchSaraminJobs({
@@ -19,14 +20,25 @@ async function main() {
     keywords: keyword,
     count: 10
   });
-  const jobs = normalizeSaraminJobs(saraminJobs, collectedAt);
+  const jobs = dedupeJobs(normalizeSaraminJobs(saraminJobs, collectedAt));
+  const summary = summarizeCollection(jobs, collectedAt);
   const outputDirectory = resolve(process.cwd(), "data", "collected");
   const outputPath = resolve(outputDirectory, `saramin-${collectedAt}.json`);
+  const latestPath = resolve(outputDirectory, "latest.json");
+  const summaryPath = resolve(outputDirectory, `saramin-${collectedAt}-summary.json`);
 
   mkdirSync(outputDirectory, { recursive: true });
   writeFileSync(outputPath, `${JSON.stringify(jobs, null, 2)}\n`, "utf8");
+  writeFileSync(latestPath, `${JSON.stringify(jobs, null, 2)}\n`, "utf8");
+  writeFileSync(summaryPath, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
 
-  console.log(`사람인 공고 ${jobs.length}개 저장: ${outputPath}`);
+  console.log(`Saramin jobs saved: ${jobs.length}`);
+  console.log(`Output: ${outputPath}`);
+  console.log(`Latest: ${latestPath}`);
+  console.log(`Summary: ${summaryPath}`);
+  console.log(
+    `Summary total=${summary.total}, new=${summary.newJobs}, ai=${summary.aiRelated}, closingSoon=${summary.closingSoon}`
+  );
 }
 
 main().catch((error: unknown) => {
